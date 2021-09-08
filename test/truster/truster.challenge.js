@@ -3,6 +3,7 @@ const { accounts, contract } = require('@openzeppelin/test-environment');
 
 const DamnValuableToken = contract.fromArtifact('DamnValuableToken');
 const TrusterLenderPool = contract.fromArtifact('TrusterLenderPool');
+const TrusterLenderPoolAttacker = contract.fromArtifact('TrusterLenderPoolAttacker');
 
 const { expect } = require('chai');
 
@@ -30,6 +31,7 @@ describe('[Challenge] Truster', function () {
 
     it('Exploit', async function () {
         /** YOUR EXPLOIT GOES HERE */
+        await TrusterLenderPoolAttacker.new(this.pool.address, this.token.address, { from: attacker})
     });
 
     after(async function () {
